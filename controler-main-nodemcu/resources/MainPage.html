@@ -1,0 +1,798 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAAQEAAAEAIAAwAAAAFgAAACgAAAABAAAAAgAAAAEAIAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAA==" />
+    <title>Heater Control Panel</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #808080;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-content > div:first-child {
+            width: 100%;
+            display: flex;
+            flex-direction: row; /* Ensure horizontal layout */
+            justify-content: flex-start; /* Start from the left */
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 1rem;    /* Reduced from 1.5rem */
+            margin-bottom: 1rem;  /* Reduced from 1.5rem */
+            box-shadow: var(--shadow);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 90px;  /* Original 60px * 1.5 */
+            height: 51px; /* Original 34px * 1.5 */
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 39px;  /* Original 26px * 1.5 */
+            width: 39px;   /* Original 26px * 1.5 */
+            left: 6px;     /* Original 4px * 1.5 */
+            bottom: 6px;   /* Original 4px * 1.5 */
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(39px); /* Original 26px * 1.5 */
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: 70px 30px 60px 30px 30px 50px; /* Adjusted column sizes */
+            gap: 0.3rem;  /* Reduced overall gap */
+            align-items: center;
+            margin: 0.5rem 0;
+            justify-content: start;
+        }
+
+        .control-group label {
+            text-align: left;
+            min-width: 70px;  /* Reduced label width */
+            padding-right: 0.2rem; /* Add small padding after label */
+        }
+
+        .control-group button {
+            width: 30px;     /* Reduced button size */
+            height: 30px;    /* Reduced button size */
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem; /* Adjust font size for +/- buttons */
+        }
+
+        /* Make Set button more compact */
+        .control-group button[type="submit"] {
+            width: auto;
+            height: auto;
+            padding: 0.3rem 0.6rem;
+            min-width: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Keep units (°C, min) aligned */
+        .control-group span {
+            min-width: 30px;
+            text-align: left;
+            padding-left: 0.2rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1976D2;
+        }
+
+        input[type="text"] {
+            padding: 0.3rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .temperature-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .temperature-display h3 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .temperature-range {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-color);
+            display: inline-block;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .navigation a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .navigation a:hover {
+            background: #f0f0f0;
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        #connection_status {
+            padding: 0.3rem;
+            color: #004900;
+            font-weight: bold;
+            font-size: 1rem;
+            display: inline-flex; /* Change to inline-flex */
+            align-items: center;
+        }
+
+        #logoutButton {
+            background-color: #dc3545;
+            margin-left: auto; /* Push to the right */
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+
+        #logoutButton:hover {
+            background-color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                grid-template-columns: auto auto;
+                gap: 0.5rem;
+            }
+            
+            .control-group label {
+                text-align: left;
+            }
+
+            .container {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Make temperature range text bigger */
+        .temperature-range {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        /* Update the header styles */
+        .header-content div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Update feedback text size */
+        #feedback_info {
+            font-size: 2em;
+            margin-bottom: 1rem;
+        }
+
+        /* Update heater info text size */
+        #heater {
+            font-size: 1.5em;
+            margin-bottom: 1rem;
+        }
+
+        /* Update temperature display sizes */
+        .temperature-display h3 {
+            font-size: 1.2em;
+        }
+
+        /* Keep controls inline */
+        .control-group {
+            display: grid;
+            grid-template-columns: 100px 40px 80px 40px 40px 60px;
+            gap: 0.5rem;
+            align-items: center;
+            margin: 1rem 0;
+            justify-content: start;
+        }
+
+        /* Ensure form fields stay inline on mobile */
+        @media (max-width: 768px) {
+            .control-group {
+                grid-template-columns: 70px 30px 60px 30px 40px 60px;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+        }
+
+        h1 {
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Update header and top controls styles */
+        .header-content > div:first-child {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #connection_status {
+            padding: 0.3rem;
+            color: #006400;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Update feedback and switch container */
+        .feedback-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #feedback_info {
+            font-size: 2em;
+            margin: 0;  /* Remove margin since we're using flex */
+        }
+
+        .switch-container {
+            flex-shrink: 0;  /* Prevent switch from shrinking */
+        }
+
+        /* Add to existing styles section */
+        .control-group button[type="submit"].modified {
+            background-color: #FFA500;  /* Yellow/Orange color */
+        }
+
+        .control-group button[type="submit"].modified:hover {
+            background-color: #FF8C00;  /* Darker shade for hover */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <span id="connection_status">.</span>
+                <button id="logoutButton">Logout</button>
+            </div>
+            <h1>Heater Control</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="feedback-container">
+                <h2 id="feedback_info">%FEEDBACK_PLACEHOLDER%</h2>
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="output" %BUTTONPLACEHOLDER%>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 id="heater">Loading...</h3>
+            <form action="/set" class="control-group">
+                <label for="termostat_min_temp">Setpoint:</label>
+                <button id="minus_temp">-</button>
+                <input type="text" id="termostat_min_temp" name="termostat_min_temp" value=%SETPOINT_PLACEHOLDER% maxlength="4">
+                <button id="plus_temp">+</button>
+                <span>°C</span>
+                <button type="submit">Set</button>
+            </form>
+
+            <form action="/set" class="control-group">
+                <label for="timer_on_time">Time on:</label>
+                <button id="minus_min">-</button>
+                <input type="text" id="timer_on_time" name="timer_on_time" value=%TIME_ON_PLACEHOLDER% maxlength="3">
+                <button id="plus_min">+</button>
+                <span>min</span>
+                <button type="submit">Set</button>
+            </form>
+
+            <form action="/set" class="control-group">
+                <label for="timer_off_time">Time off:</label>
+                <button id="minus_max">-</button>
+                <input type="text" id="timer_off_time" name="timer_off_time" value=%TIME_OFF_PLACEHOLDER% maxlength="3">
+                <button id="plus_max">+</button>
+                <span>min</span>
+                <button type="submit">Set</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="temperature-display">
+                <h3>
+                    Puffer: <span id="puffertemp">%PUF_T_PLACEHOLDER%</span> °C
+                    <span class="temperature-range">(%PUF_T_MIN_PLACEHOLDER% °C \ %PUF_T_MAX_PLACEHOLDER% °C)</span>
+                </h3>
+            </div>
+            <div class="temperature-display">
+                <h3>Heater: <span id="boilertemp">%HEAT_T_PLACEHOLDER%</span> °C</h3>
+            </div>
+        </div>
+
+        <nav class="navigation">
+            <a href="/chart.html">Information</a>
+            <a href="/settings.html">Settings</a>
+        </nav>
+    </div>
+
+    <footer>
+        <h3>%VERSIONPLACEHOLDER%</h3>
+    </footer>
+
+    <!-- Keep existing script section unchanged -->
+    <script>
+  // Configuration object for all constants and settings
+  const CONFIG = {
+      ENDPOINTS: {
+          CONNECTION: '/connection_status',
+          HEATER_INFO: '/heating_info',
+          PUFFER_TEMP: '/puffer_temperature',
+          BOILER_TEMP: '/boiler_temperature',
+          SLIDER_STATE: '/state_slider_button',
+          FEEDBACK: '/feedback_text',
+          LOGOUT: '/logout',
+          LOGGEDOUT: '/logged-out',
+          UPDATE: '/update',
+          SET: '/set'
+      },
+      INTERVALS: {
+          CONNECTION: 5000,
+          HEATER: 1000,
+          TEMPERATURE: 10000,
+          FEEDBACK: 3000
+      },
+      LIMITS: {
+          TEMPERATURE: { MIN: 10, MAX: 35, STEP: 0.1 },
+          TIME_ON: { MIN: 20, MAX: 120, STEP: 10 },
+          TIME_OFF: { MIN: 0, MAX: 360, STEP: 10 }
+      }
+  };
+  
+  // Utility class for API calls
+  class ApiClient {
+      static async fetch(endpoint, options = {}) {
+          try {
+              const response = await fetch(endpoint, {
+                  method: options.method || 'GET',
+                  headers: options.headers || {},
+                  ...options
+              });
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+              return await response.text();
+          } catch (error) {
+              console.error(`API call failed: ${endpoint}`, error);
+              throw error;
+          }
+      }
+  }
+  
+  // Class to handle data polling
+  class DataPoller {
+      constructor(elementId, endpoint, interval, updateCallback) {
+          this.element = document.getElementById(elementId);
+          this.endpoint = endpoint;
+          this.interval = interval;
+          this.updateCallback = updateCallback;
+          this.intervalId = null;
+      }
+  
+      start() {
+          if (!this.element) return;
+          this.poll();
+          this.intervalId = setInterval(() => this.poll(), this.interval);
+      }
+  
+      stop() {
+          if (this.intervalId) {
+              clearInterval(this.intervalId);
+              this.intervalId = null;
+          }
+      }
+  
+      async poll() {
+          try {
+              const data = await ApiClient.fetch(this.endpoint);
+              this.updateCallback(this.element, data);
+          } catch (error) {
+              console.error(`Polling failed for ${this.endpoint}`);
+          }
+      }
+  }
+  
+  // Class to handle button controls
+  class ButtonControl {
+    constructor(config) {
+        const { minusId, plusId, inputId, min, max, step, format } = config;
+        this.minusButton = document.getElementById(minusId);
+        this.plusButton = document.getElementById(plusId);
+        this.input = document.getElementById(inputId);
+        this.min = min;
+        this.max = max;
+        this.step = step;
+        
+        // Fix format function definition
+        this.format = format || function(x) {
+            const value = parseFloat(x);
+            return isNaN(value) ? this.min.toString() : Math.round(value).toString();
+        };
+        
+        // Initialize with valid value
+        if (this.input) {
+            const initialValue = parseFloat(this.input.value) || this.min;
+            const validValue = Math.max(this.min, Math.min(this.max, initialValue));
+            this.input.value = this.format(validValue);
+        }
+        
+        this.initialValue = this.input ? this.input.value : '';
+        this.setupListeners();
+    }
+
+    setupListeners() {
+        if (this.minusButton) {
+            this.minusButton.addEventListener('click', (e) => {
+                this.handleMinus(e);
+                this.checkValueChanged();
+            });
+        }
+        if (this.plusButton) {
+            this.plusButton.addEventListener('click', (e) => {
+                this.handlePlus(e);
+                this.checkValueChanged();
+            });
+        }
+        if (this.input) {
+            this.input.addEventListener('change', () => {
+                this.validateInput();
+                this.checkValueChanged();
+            });
+            this.input.addEventListener('input', () => this.checkValueChanged());
+        }
+    }
+
+    handleMinus(event) {
+        event.preventDefault();
+        const currentValue = parseFloat(this.input.value) || this.min;
+        const newValue = Math.max(this.min, currentValue - this.step);
+        this.input.value = this.format(newValue);
+    }
+
+    handlePlus(event) {
+        event.preventDefault();
+        const currentValue = parseFloat(this.input.value) || this.min;
+        const newValue = Math.min(this.max, currentValue + this.step);
+        this.input.value = this.format(newValue);
+    }
+
+    validateInput() {
+        const currentValue = parseFloat(this.input.value) || this.min;
+        const validValue = Math.min(this.max, Math.max(this.min, currentValue));
+        this.input.value = this.format(validValue);
+    }
+
+    checkValueChanged() {
+        if (!this.input) return;
+        
+        const submitButton = this.input.closest('form').querySelector('button[type="submit"]');
+        if (this.input.value !== this.initialValue) {
+            submitButton.classList.add('modified');
+        } else {
+            submitButton.classList.remove('modified');
+        }
+    }
+
+    // Add new method to update initialValue
+    updateInitialValue() {
+        if (this.input) {
+            this.initialValue = this.input.value;
+        }
+    }
+}
+  
+  // Connection manager class
+  class ConnectionManager {
+    constructor() {
+        this.statusElement = document.getElementById('connection_status');
+        this.lastUpdateTime = Date.now();
+        this.checkInterval = 6000; // Slightly longer than polling interval
+        this.connectionChecker = null;
+        
+        this.poller = new DataPoller(
+            'connection_status',
+            CONFIG.ENDPOINTS.CONNECTION,
+            CONFIG.INTERVALS.CONNECTION,
+            this.handleConnectionUpdate.bind(this)
+        );
+    }
+
+    start() {
+        this.poller.start();
+        // Start connection checker
+        this.connectionChecker = setInterval(() => this.checkConnection(), 1000);
+    }
+
+    handleConnectionUpdate(element, data) {
+        if (!element) return;
+        
+        this.lastUpdateTime = Date.now();
+        element.innerHTML = data;
+        element.style.color = '#006400'; // Dark green
+    }
+
+    checkConnection() {
+        const timeSinceLastUpdate = Date.now() - this.lastUpdateTime;
+        
+        if (timeSinceLastUpdate > this.checkInterval) {
+            // Connection lost
+            if (this.statusElement) {
+                this.statusElement.innerHTML = 'Connection error!';
+                this.statusElement.style.color = 'red';
+            }
+        }
+    }
+}
+  
+  function getFeedbackColor(feedback) {
+    if (!feedback) return 'black';
+    const text = feedback.toLowerCase();
+    if (text.includes('error')) return 'red';
+    if (text.includes('off')) return 'saddlebrown';
+    if (text.includes('on')) return 'darkgreen';
+    if (text.includes('hot')) return 'firebrick';
+    if (text.includes('cold')) return 'blue';
+    return 'black';
+  }
+  
+  // Add this before initializeApp
+  let controls = []; // Make controls accessible globally
+
+  // Update the initializeApp function
+  function initializeApp() {
+      // Initialize button controls
+      controls = [  // Assign to global controls array
+          new ButtonControl({
+              minusId: 'minus_temp',
+              plusId: 'plus_temp',
+              inputId: 'termostat_min_temp',
+              min: CONFIG.LIMITS.TEMPERATURE.MIN,
+              max: CONFIG.LIMITS.TEMPERATURE.MAX,
+              step: CONFIG.LIMITS.TEMPERATURE.STEP,
+              format: (x) => parseFloat(x).toFixed(1)
+          }),
+          new ButtonControl({
+              minusId: 'minus_min',
+              plusId: 'plus_min',
+              inputId: 'timer_on_time',
+              min: CONFIG.LIMITS.TIME_ON.MIN,
+              max: CONFIG.LIMITS.TIME_ON.MAX,
+              step: CONFIG.LIMITS.TIME_ON.STEP,
+              format: (x) => Math.round(x).toString()
+          }),
+          new ButtonControl({
+              minusId: 'minus_max',
+              plusId: 'plus_max',
+              inputId: 'timer_off_time',
+              min: CONFIG.LIMITS.TIME_OFF.MIN,
+              max: CONFIG.LIMITS.TIME_OFF.MAX,
+              step: CONFIG.LIMITS.TIME_OFF.STEP,
+              format: (x) => Math.round(x).toString()
+          })
+      ];
+  
+      // Initialize data pollers
+      const pollers = [
+          new DataPoller('heater', CONFIG.ENDPOINTS.HEATER_INFO, CONFIG.INTERVALS.HEATER,
+              (el, data) => { el.innerHTML = data; el.style.color = 'black'; }),
+          new DataPoller('puffertemp', CONFIG.ENDPOINTS.PUFFER_TEMP, CONFIG.INTERVALS.TEMPERATURE,
+              (el, data) => { el.innerHTML = data; el.style.color = 'blue'; }),
+          new DataPoller('boilertemp', CONFIG.ENDPOINTS.BOILER_TEMP, CONFIG.INTERVALS.TEMPERATURE,
+              (el, data) => { el.innerHTML = data; el.style.color = 'red'; }),
+          new DataPoller('feedback_info', CONFIG.ENDPOINTS.FEEDBACK, CONFIG.INTERVALS.FEEDBACK,
+            (el, data) => { 
+              el.innerHTML = data; 
+              el.style.color = getFeedbackColor(data);
+            }),
+          new DataPoller('output', CONFIG.ENDPOINTS.SLIDER_STATE, CONFIG.INTERVALS.HEATER,
+            (el, data) => { el.checked = data === '1'; })
+      ];
+  
+      // Start pollers
+      pollers.forEach(poller => poller.start());
+  
+      // Initialize connection manager
+      const connectionManager = new ConnectionManager();
+      connectionManager.start();
+  
+      // Setup event handlers
+      setupEventHandlers();
+  }
+  
+  // Update the setupEventHandlers function
+  function setupEventHandlers() {
+    // Checkbox handler
+    const checkbox = document.getElementById('output');
+    if (checkbox) {
+        checkbox.removeAttribute('onchange');
+        checkbox.addEventListener('change', async (e) => {
+            try {
+                e.preventDefault();
+                const state = e.target.checked ? 1 : 0;
+                await ApiClient.fetch(`/update?state_slider_button=${state}`, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+            } catch (error) {
+                console.error('Failed to update checkbox state');
+                e.target.checked = !e.target.checked;
+            }
+        });
+    }
+
+    // Logout handler
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(CONFIG.ENDPOINTS.LOGOUT, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+                
+                // 401 is expected after logout, redirect anyway
+                if (response.status === 401 || response.ok) {
+                    window.location.href = CONFIG.ENDPOINTS.LOGGEDOUT;
+                } else {
+                    throw new Error(`Unexpected status: ${response.status}`);
+                }
+            } catch (error) {
+                if (error.message.includes('401')) {
+                    // Still redirect on 401
+                    window.location.href = CONFIG.ENDPOINTS.LOGGEDOUT;
+                } else {
+                    console.error('Logout failed:', error);
+                    alert('Logout failed. Please try again.');
+                }
+            }
+        });
+    }
+
+    // Prevent form submissions and handle them via API
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const input = form.querySelector('input[type="text"]');
+            
+            try {
+                await ApiClient.fetch(`/set?${params.toString()}`);
+                
+                if (input) {
+                    // Find the corresponding ButtonControl instance
+                    const control = controls.find(c => c.input === input);
+                    if (control) {
+                        control.updateInitialValue();
+                        submitButton.classList.remove('modified');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update value:', error);
+            }
+        });
+    });
+}
+  
+  // Start the application when DOM is loaded
+  document.addEventListener('DOMContentLoaded', initializeApp);
+  </script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAAQEAAAEAIAAwAAAAFgAAACgAAAABAAAAAgAAAAEAIAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAA==" />
+    <title>Settings</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #808080;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Update form and input styling */
+        form {
+            display: grid;
+            grid-template-columns: 200px 150px auto;  /* Reduced column widths */
+            gap: 0.5rem;  /* Reduced gap */
+            align-items: center;
+            margin: 0.4rem 0;  /* Reduced margin */
+        }
+
+        label {
+            display: inline-block;
+            margin: 0;
+            font-weight: 500;
+            text-align: left;
+            font-size: 0.95rem;  /* Slightly smaller font */
+        }
+
+        input[type="text"], select {
+            padding: 0.4rem;  /* Reduced padding */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;  /* Reduced width */
+            text-align: center;
+            margin: 0;
+            font-size: 0.95rem;  /* Slightly smaller font */
+        }
+
+        input[type="submit"] {
+            width: min-content;  /* Fit content width */
+            padding: 0.3rem 0.6rem;  /* Reduced padding */
+            margin: 0;
+            white-space: nowrap;
+            font-size: 0.9rem;  /* Slightly smaller font */
+            min-width: 50px;  /* Minimum width for the save button */
+        }
+
+        button, input[type="submit"] {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .action-buttons a {
+            color: white;  /* Changed to white for better contrast */
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        /* Add specific button colors */
+        .action-buttons a[href="/flash_uno"] {
+            background-color: #B8860B;  /* Dark Yellow */
+        }
+
+        .action-buttons a[href="/disconnect"] {
+            background-color: #FF4500;  /* Deep Orange */
+        }
+
+        .action-buttons a[href="/reset_uno"],
+        .action-buttons a[href="/reset_esp"] {
+            background-color: #DC3545;  /* Red */
+        }
+
+        /* Hover states */
+        .action-buttons a[href="/flash_uno"]:hover {
+            background-color: #8B6508;  /* Darker Yellow */
+        }
+
+        .action-buttons a[href="/disconnect"]:hover {
+            background-color: #CC3700;  /* Darker Orange */
+        }
+
+        .action-buttons a[href="/reset_uno"]:hover,
+        .action-buttons a[href="/reset_esp"]:hover {
+            background-color: #C82333;  /* Darker Red */
+        }
+
+        nav {
+            margin-top: 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        nav a:hover {
+            background: #f0f0f0;
+        }
+
+        .uptime-info {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+
+        #uno_uptime_id {
+            color: blue;
+            font-weight: bold;
+        }
+
+        #esp_uptime_id {
+            color: green;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Update mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            input[type="text"], select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Settings</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="action-buttons">
+                <a href="/flash_uno" onclick="return confirm('Are you sure you want to program the UNO controller?');">Flash UNO</a>
+                <a href="/disconnect" onclick="return confirm('Are you sure you want to disconnect and reset wifi settings?');">Reset WIFI</a>
+                <a href="/reset_uno" onclick="return confirm('Are you sure you want to reboot the UNO controller?');">Reset UNO</a>
+                <a href="/reset_esp" onclick="return confirm('Are you sure you want to reboot the ESP controller?');">Reset ESP</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Heating settings</h2>
+            <form action="/set">
+                <label for="heating_mode">Heating mode:</label>
+                <select name="heating_mode" id="heating_mode">
+                    %HEATING_MODE_SELECT_PLACEHOLDER%
+                </select>
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="termostat_min_temp">Temperature setpoint:</label>
+                <input type="text" id="termostat_min_temp" name="termostat_min_temp" value="%AMBIENT_MIN_TEMP_PLACEHOLDER%" maxlength="4">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="timer_on_time">Timer on time:</label>
+                <input type="text" id="timer_on_time" name="timer_on_time" value="%TIMER_ON_PLACEHOLDER%" maxlength="3">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="timer_off_time">Timer off time:</label>
+                <input type="text" id="timer_off_time" name="timer_off_time" value="%TIMER_OFF_PLACEHOLDER%" maxlength="3">
+                <input type="submit" value="Save">
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Puffer settings</h2>
+            <form action="/set">
+                <label for="min_puffer_temp">Minimum puffer temperature:</label>
+                <input type="text" id="min_puffer_temp" name="min_puffer_temp" value="%PUFFER_MIN_PLACEHOLDER%" maxlength="2">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="max_puffer_temp">Maximum puffer temperature:</label>
+                <input type="text" id="max_puffer_temp" name="max_puffer_temp" value="%PUFFER_MAX_PLACEHOLDER%" maxlength="2">
+                <input type="submit" value="Save">
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>MQTT Settings</h2>
+            <form action="/set">
+                <label for="mqtt_state">MQTT Connection:</label>
+                <select id="mqtt_state" name="mqtt_state">
+                    <option value="1" %MQTT_ENABLED_SELECTED%>Enabled</option>
+                    <option value="0" %MQTT_DISABLED_SELECTED%>Disabled</option>
+                </select>
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="broker_ip">MQTT Broker IP:</label>
+                <input type="text" 
+                       id="broker_ip" 
+                       name="broker_ip" 
+                       maxlength="45" 
+                       value="%BROKER_IP_PLACEHOLDER%" 
+                       title="Please enter a valid IP address (e.g. 192.168.1.100) or .local hostname (e.g. mydevice.local)">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="mqtt_port">MQTT Port:</label>
+                <input type="text" id="mqtt_port" 
+                       name="mqtt_port" 
+                       value="%MQTT_PORT_PLACEHOLDER%"
+                       maxlength="5" 
+                       pattern="^[1-9][0-9]{0,4}$" 
+                       title="Please enter a valid port number (1-65535)" 
+                       min="1" max="65535">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="mqtt_user">MQTT Username:</label>
+                <input type="text" 
+                       id="mqtt_user" 
+                       name="mqtt_user" 
+                       value="%MQTT_USER_PLACEHOLDER%" 
+                       maxlength="20" 
+                       pattern="^[a-zA-Z0-9_]+$" 
+                       title="Please enter a valid username (letters, numbers, and underscores only)">
+                <input type="submit" value="Save">
+            </form>
+
+            <form action="/set">
+                <label for="mqtt_pass">MQTT Password:</label>
+                <input type="text" 
+                       id="mqtt_pass" 
+                       name="mqtt_pass" 
+                       value="%MQTT_PASS_PLACEHOLDER%" 
+                       maxlength="20" 
+                       pattern="^[a-zA-Z0-9_]+$" 
+                       title="Please enter a valid password (letters, numbers, and underscores only)">
+                <input type="submit" value="Save">
+            </form>
+        </div>
+
+        <div class="uptime-info">
+            <p>Uno uptime: <span id="uno_uptime_id"></span></p>
+            <p>Esp uptime: <span id="esp_uptime_id"></span></p>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="/">Control panel</a></li>
+                <li><a href="/webserial">Web serial</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <footer>
+        <p>Heater Control System</p>
+    </footer>
+
+    <script>
+        // Update the polling code to use modern fetch API
+        function startPolling(elementId, endpoint, interval, color) {
+            setInterval(async () => {
+                try {
+                    const response = await fetch(endpoint);
+                    if (response.ok) {
+                        const data = await response.text();
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            element.innerHTML = data;
+                            element.style.color = color;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Polling failed for ${endpoint}:`, error);
+                }
+            }, interval);
+        }
+
+        // Add this CSS for feedback animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes feedback-success {
+                0% { background-color: transparent; }
+                50% { background-color: rgba(40, 167, 69, 0.2); }
+                100% { background-color: transparent; }
+            }
+            
+            form.feedback-success {
+                animation: feedback-success 0.8s ease-out;
+            }
+            
+            input[type="submit"].modified {
+                background-color: #FFA500 !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Utility class for API calls
+        class ApiClient {
+            static async fetch(endpoint, options = {}) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: options.method || 'GET',
+                        headers: options.headers || {},
+                        ...options
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.text();
+                } catch (error) {
+                    console.error(`API call failed: ${endpoint}`, error);
+                    throw error;
+                }
+            }
+        }
+
+        // Setup form handlers
+        function setupFormHandlers() {
+            document.querySelectorAll('form').forEach(form => {
+                const input = form.querySelector('input[type="text"], select');
+                const submitButton = form.querySelector('input[type="submit"]');
+                
+                if (input && submitButton) {
+                    let initialValue = input.value;
+
+                    // Track changes
+                    input.addEventListener('input', () => {
+                        if (input.value !== initialValue) {
+                            submitButton.classList.add('modified');
+                        } else {
+                            submitButton.classList.remove('modified');
+                        }
+                    });
+
+                    // Handle form submission
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const params = new URLSearchParams(formData);
+                        
+                        try {
+                            await ApiClient.fetch(`/set?${params.toString()}`);
+                            initialValue = input.value;
+                            submitButton.classList.remove('modified');
+                            
+                            // Add success feedback animation
+                            form.classList.remove('feedback-success');
+                            void form.offsetWidth; // Force reflow
+                            form.classList.add('feedback-success');
+                            setTimeout(() => form.classList.remove('feedback-success'), 800);
+                        } catch (error) {
+                            console.error('Failed to update value:', error);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Update the initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Existing polling code
+            startPolling('uno_uptime_id', '/uno_uptime', 1000, 'blue');
+            startPolling('esp_uptime_id', '/esp_uptime', 1000, 'green');
+            
+            // Setup form handlers
+            setupFormHandlers();
+        });
+    </script>
+</body>
+</html>

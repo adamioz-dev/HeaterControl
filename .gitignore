@@ -1,0 +1,11 @@
+controler-main-nodemcu/.pio
+controler-main-nodemcu/.vscode/.browse.c_cpp.db*
+controler-main-nodemcu/.vscode/c_cpp_properties.json
+controler-main-nodemcu/.vscode/launch.json
+controler-main-nodemcu/.vscode/ipch
+controler-slave-uno/.pio
+controler-slave-uno/.vscode/.browse.c_cpp.db*
+controler-slave-uno/.vscode/c_cpp_properties.json
+controler-slave-uno/.vscode/launch.json
+controler-slave-uno/.vscode/ipch
+controler-main-nodemcu/.version_no_increment

@@ -1,0 +1,475 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information</title>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #808080;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        #container {
+            width: 100%;
+            height: 500px;
+            margin-bottom: 1rem;
+        }
+
+        /* Form styling */
+        form {
+            margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: white;
+        }
+
+        button, input[type="submit"] {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        /* Feedback codes styling */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        ul li:last-child {
+            border-bottom: none;
+        }
+
+        /* Navigation styling */
+        nav {
+            margin-top: 1rem;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 1rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background: #f0f0f0;
+        }
+
+        /* Data points counter styling */
+        #len_id {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #container {
+                height: 400px;
+            }
+        }
+
+        /* Add to existing style section */
+        @keyframes feedback-success {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(40, 167, 69, 0.2); }
+            100% { background-color: transparent; }
+        }
+
+        form.feedback-success {
+            animation: feedback-success 0.8s ease-out;
+        }
+
+        input[type="submit"].modified {
+            background-color: #FFA500 !important;
+        }
+
+        input[type="submit"].modified:hover {
+            background-color: #FF8C00 !important;
+        }
+
+        .feedback-codes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .feedback-codes span {
+            background: var(--background-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .compact-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            padding: 0.5rem;
+            list-style: none;
+        }
+
+        .compact-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem;
+            border: none;
+        }
+
+        .compact-list span {
+            background: var(--background-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Information</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div id="container"></div>
+            <p>Stored data points: <span id="len_id">0</span></p>
+        </div>
+
+        <div class="card">
+            <form action="/set">
+                <label for="store_history_data">Store data:</label>
+                <select name="store_history_data" id="store_history_data">
+                    <option value="0">disable</option>
+                    <option value="1">enable</option>
+                </select>
+                <input type="submit" value="Save">
+            </form>
+        </div>
+        <div class="card">
+            <h2>Feedback codes</h2>
+            <ul class="compact-list">
+                <li><span>2550</span>Control error</li>
+                <li><span>30</span>Puffer overheat</li>
+                <li><span>20</span>Heating pump ON</li>
+                <li><span>10</span>Heating pump OFF</li>
+                <li><span>0</span>Puffer low temp</li>
+            </ul>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="/">Control panel</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <footer>
+        <p>Heater Control System</p>
+    </footer>
+
+    <script>
+// Utility class for API calls
+class ApiClient {
+    static async fetch(endpoint, options = {}) {
+        try {
+            const response = await fetch(endpoint, {
+                method: options.method || 'GET',
+                headers: options.headers || {},
+                ...options
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.text();
+        } catch (error) {
+            console.error(`API call failed: ${endpoint}`, error);
+            throw error;
+        }
+    }
+}
+
+// Setup form handlers
+function setupFormHandlers() {
+    document.querySelectorAll('form').forEach(form => {
+        const select = form.querySelector('select');
+        const submitButton = form.querySelector('input[type="submit"]');
+        
+        if (select && submitButton) {
+            let initialValue = select.value;
+
+            // Track changes
+            select.addEventListener('change', () => {
+                if (select.value !== initialValue) {
+                    submitButton.classList.add('modified');
+                } else {
+                    submitButton.classList.remove('modified');
+                }
+            });
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+                
+                try {
+                    await ApiClient.fetch(`/set?${params.toString()}`);
+                    initialValue = select.value;
+                    submitButton.classList.remove('modified');
+                    
+                    // Add success feedback animation
+                    form.classList.remove('feedback-success');
+                    void form.offsetWidth; // Force reflow
+                    form.classList.add('feedback-success');
+                    setTimeout(() => form.classList.remove('feedback-success'), 800);
+                } catch (error) {
+                    console.error('Failed to update value:', error);
+                }
+            });
+        }
+    });
+}
+
+// Initialize form handlers when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupFormHandlers();
+});
+
+  // update functions
+  setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var e = document.getElementById("len_id");
+      e.innerHTML = this.responseText;
+      e.style.color = 'red'; 
+    }
+  };
+  xhttp.open("GET", "/history_len", true);
+  xhttp.send();
+}, 1000 ) ;
+  // chart updater script
+  var chart_Fire_Info = Highcharts.stockChart('container', {
+      chart: {
+          backgroundColor: '#f1f1f1',
+          type: 'line'
+      },
+       rangeSelector: {
+        selected: 1
+      },
+      title: {
+          text: ''
+      },
+      yAxis: {
+          title: {
+              text: ''
+          },
+          plotLines: [{
+              value: 100, 
+              color: 'gray',
+              dashStyle: 'shortdash',
+              width: 2,
+              label: {
+                  text: ''
+              }
+			      }
+          ]
+      },
+      xAxis: { 
+        title: { 
+          text: 'Time'
+          }, 
+        type: 'datetime'
+      },
+      plotOptions: {
+          series: {
+              label: {
+                  connectorAllowed: true
+              },
+          }
+      },
+  
+  series: [{
+          name: 'Feedback Code (see below)',  //y_value_0
+          color: 'orange',
+          data: [%FEEDBACK_DATA_PLACEHODLER%]
+      },{
+          name: 'Puffer (&deg;C)',  //y_value_1
+          color: 'blue',
+          data: [%PUFFER_DATA_PLACEHODLER%]
+      },{
+          name: 'Time Remaining (min)',  //y_value_3
+          color: 'yellow',
+          data: [%TIME_REMAINING_DATA_PLACEHODLER%]
+      },{
+          name: 'Room temperature (&deg;C)',  //y_value_5
+          color: 'black',
+          data: [%ROOM_DATA_PLACEHODLER%]
+      },{
+          name: 'Set room temp (&deg;C)',  //y_value_6
+          color: 'grey',
+          data: [%ROOM_TARGET_DATA_PLACEHODLER%]
+      },{
+          name: 'Heater (&deg;C)',  //y_value_7
+          color: 'red',
+          data: [%HEATER_DATA_PLACEHODLER%]
+      }],
+  
+  });
+  setInterval(function ( ) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var current_time = new Date();
+        const timezone_offset = current_time.getTimezoneOffset() * 60 * 1000;
+        //console.log(timezone_offset);
+        var response_str = this.responseText;
+        var x = current_time.getTime() - timezone_offset,
+            y_value_0 =  parseFloat(response_str.split("|")[0]);
+            y_value_1 =  parseFloat(response_str.split("|")[1]);
+            y_value_2 =  parseFloat(response_str.split("|")[2]);
+            y_value_3 =  parseFloat(response_str.split("|")[3]);
+            y_value_4 =  parseFloat(response_str.split("|")[4]);
+            y_value_5 =  parseFloat(response_str.split("|")[5]);
+        //console.log(this.responseText);
+        //values to be filled in
+        //Value 0
+        if(chart_Fire_Info.series[0].data.length > 600) {
+          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, true, true);
+        } else {
+          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, false, true);
+        }
+        //Value 1
+        if(chart_Fire_Info.series[1].data.length > 600) {
+          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, true, true);
+        } else {
+          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, false, true);
+        }
+        //Value 2
+        if(chart_Fire_Info.series[2].data.length > 600) {
+          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, true, true);
+        } else {
+          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, false, true);
+        }
+        //Value 3
+        if(chart_Fire_Info.series[3].data.length > 600) {
+          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, true, true);
+        } else {
+          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, false, true);
+        }
+        //Value 4
+        if(chart_Fire_Info.series[4].data.length > 600) {
+          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, true, true);
+        } else {
+          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, false, true);
+        }
+        //Value 5
+        if(chart_Fire_Info.series[5].data.length > 600) {
+          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, true, true);
+        } else {
+          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, false, true);
+        }
+      }
+    };
+    xhttp.open("GET", "/chart_info", true);
+    xhttp.send();
+  }, 60000 ) ; // every minute
+  </script>
+</body>
+</html>
