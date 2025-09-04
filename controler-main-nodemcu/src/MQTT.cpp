@@ -4,6 +4,7 @@
 // Add to your main sketch
 #include <MQTT.h> 
 #include "common.h"
+#include <ArduinoJson.h>
 
 // marker for communication error
 extern bool communication_error;
@@ -30,6 +31,7 @@ void MQTTClient::begin() {
     uint16_t storedPort = storage.loadMQTTPort();
     String storedUser = storage.loadMQTTUser();
     String storedPass = storage.loadMQTTPass();
+    String storedTempTopic = storage.loadMQTTTempTopic();
 	if (storedIP.length() > 0) {
         DEBUG_PRINT("MQTT: Loaded stored broker IP: ");
         DEBUG_PRINT_LN(storedIP);
@@ -69,6 +71,16 @@ void MQTTClient::begin() {
         storage.storeMQTTPass(mqtt_password.c_str()); // Store default password in EEPROM
     }
 
+    if (storedTempTopic.length() > 0) {
+        DEBUG_PRINT("MQTT: Loaded stored password: ");
+        DEBUG_PRINT_LN(storedTempTopic);
+        mqtt_temp_topic = storedTempTopic;
+    } else {
+        DEBUG_PRINT_LN("MQTT: No stored temperature topic found, using default");
+        mqtt_temp_topic = MQTT_TOPIC_CONTROL_TEMP; // Default
+        storage.storeMQTTTempTopic(mqtt_temp_topic.c_str()); // Store default password in EEPROM
+    }
+
     client.setServer(mqtt_server.c_str(), mqtt_port);
     // Check if MQTT is enabled in EEPROM and connect if so
     mqtt_enabled = storage.loadMQTTEnabled();
@@ -103,15 +115,22 @@ bool MQTTClient::isConnected() {
 }
 
 void MQTTClient::setCallback(void (*callback)(char*, byte*, unsigned int)) {
+    // set the callback function for incoming messages
     client.setCallback(callback);
 }
 
 void MQTTClient::connect() {
     if (client.connect("HeaterController", mqtt_user.c_str(), mqtt_password.c_str())) {
+        // change buffer size 
+        client.setBufferSize(512); // Increase buffer size if needed
         // Note: Use c_str() when passing to PubSubClient methods
         client.setServer(mqtt_server.c_str(), mqtt_port);
         // Subscribe to control topics
         client.subscribe(MQTT_TOPIC_CONTROL_SUBS);
+        // subscribe to temperature topic
+        client.subscribe(mqtt_temp_topic.c_str());
+        DEBUG_PRINT("MQTT: subscribed to temperature topic: ");
+        DEBUG_PRINT_LN(mqtt_temp_topic.c_str());
         
         // Publish connection status
         client.publish(MQTT_TOPIC_PUBLISH, "connected");
@@ -163,6 +182,15 @@ void MQTTClient::setEnabled(bool enabled) {
     storage.storeMQTTEnabled(enabled);
 }
 
+void MQTTClient::setMqttTempTopic(const char* topic) {
+    mqtt_temp_topic = topic;
+    storage.storeMQTTTempTopic(topic);
+}
+
+String MQTTClient::getMqttTempTopic() {
+    return mqtt_temp_topic;
+}
+
 // ***********************************************************************
 // FUNCTIONS
 // ***********************************************************************
@@ -212,7 +240,7 @@ void publishMqtt() {
 
 // Callback function for incoming MQTT messages
 // This function is called when a message arrives on a subscribed topic
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
+void IRAM_ATTR mqttCallback(char* topic, byte* payload, unsigned int length) {
     if (!mqtt.isEnabled()) {
         DEBUG_PRINT_LN("MQTT: Disabled, skipping callback");
         return;
@@ -239,10 +267,56 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         }
     }
     // handle measured temperatures received
-    else if (String(topic) == MQTT_TOPIC_CONTROL_TEMP) {
-        if (isValidNumber(message)) {
+    else if (String(topic) == mqtt.getMqttTempTopic()) {
+        // check if message is json formatted
+        if (message.startsWith("{") && message.endsWith("}")) {
+            // parse json
+            JsonDocument doc;
+            DeserializationError error = deserializeJson(doc, message);
+            if (error) {
+                DEBUG_PRINT("MQTT: JSON parse error: ");
+                DEBUG_PRINT_LN(error.c_str());
+                return;
+            }
+            // extract temperature value, try different keys
+            if (doc.containsKey("tempc")) {
+                float targetTemp = doc["tempc"];
+                receiveRoomTemp(targetTemp);
+            }
+            else if (doc.containsKey("tempf")) {
+                float targetTempF = doc["tempf"];
+                float targetTempC = (targetTempF - 32) * 5.0 / 9.0;
+                receiveRoomTemp(targetTempC);
+            }
+            else if (doc.containsKey("tempk")) {
+                float targetTempK = doc["tempk"];
+                float targetTempC = targetTempK - 273.15;
+                receiveRoomTemp(targetTempC);
+            }
+            else if (doc.containsKey("temperature")) {
+                // assume temperature in Celsius if no unit specified
+                float targetTemp = doc["temperature"];
+                receiveRoomTemp(targetTemp);
+            }
+            else if (doc.containsKey("temp")) {
+                // assume temperature in Celsius if no unit specified
+                float targetTemp = doc["temp"];
+                receiveRoomTemp(targetTemp);
+            } else {
+                DEBUG_PRINT_LN("MQTT: JSON does not contain any expected temperature keys, ignoring");
+                return;
+            }
+        // check if message is just a valid number
+        } else if (isValidNumber(message)) {
             float targetTemp = message.toFloat();
+            if (targetTemp < 0.0f || targetTemp > 40.0f) {
+                DEBUG_PRINT_LN("MQTT: Received temperature out of range, ignoring");
+                return;
+            }
             receiveRoomTemp(targetTemp);
+        } else {
+            DEBUG_PRINT_LN("MQTT: Invalid data format received, ignoring");
+            return;
         }
     }
 }

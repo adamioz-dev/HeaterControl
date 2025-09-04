@@ -12,7 +12,7 @@
 // controls
 #define MQTT_TOPIC_CONTROL_SUBS     "home/heater/control/#"
 #define MQTT_TOPIC_CONTROL_STATE    "home/heater/control/state"
-#define MQTT_TOPIC_CONTROL_TEMP     "home/heater/control/temperature"
+#define MQTT_TOPIC_CONTROL_TEMP     "home/heater/control/temperature" // default topic for room temperature
 // States
 #define MQTT_TOPIC_PUBLISH          "home/heater/status"
 #define MQTT_TOPIC_PUBLISH_FEEDBACK "home/heater/status/feedback"
@@ -50,12 +50,15 @@ public:
     String getPassword() { return mqtt_password; }
     bool isEnabled() const { return mqtt_enabled; }
     void setEnabled(bool enabled);
+    String getMqttTempTopic();
+    void setMqttTempTopic(const char* topic);
     
 private:
     String mqtt_server;
     uint16_t mqtt_port;
     String mqtt_user;
     String mqtt_password;
+    String mqtt_temp_topic;
     WiFiClient espClient;
     PubSubClient client;
     unsigned long lastReconnectAttempt = 0;

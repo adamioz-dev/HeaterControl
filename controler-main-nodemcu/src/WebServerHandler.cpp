@@ -111,6 +111,7 @@ const char *PARAM_MQTT_BROKER_IP =        "broker_ip";
 const char *PARAM_MQTT_BROKER_PORT =      "broker_port";
 const char *PARAM_MQTT_USER =             "mqtt_user";
 const char *PARAM_MQTT_PASS =             "mqtt_pass";
+const char *PARAM_MQTT_TEMP_TOPIC =       "mqtt_temp_topic";
 
 
 // login info for web page
@@ -409,6 +410,9 @@ String setting_processor(const String &var) {
   }
   else if (var == "MQTT_PASS_PLACEHOLDER") {
     return String(mqtt.getPassword());
+  }
+  else if (var == "MQTT_TEMP_TOPIC_PLACEHOLDER") {
+    return String(mqtt.getMqttTempTopic());
   }
   else if (var == "MQTT_ENABLED_SELECTED") {
     return String(mqtt.isEnabled() ? "selected" : "");
@@ -752,6 +756,13 @@ void server_page_setup() {
       inputParam = PARAM_MQTT_PASS;
       DEBUG_PRINT_LN(inputMessage);
       mqtt.setPassword(inputMessage.c_str());
+    }
+    // GET input1 value on <ESP_IP>/set?mqtt_temp_topic=<inputMessage>
+    else if (request->hasParam(PARAM_MQTT_TEMP_TOPIC)) {
+      inputMessage = request->getParam(PARAM_MQTT_TEMP_TOPIC)->value();
+      inputParam = PARAM_MQTT_TEMP_TOPIC;
+      DEBUG_PRINT_LN(inputMessage);
+      mqtt.setMqttTempTopic(inputMessage.c_str());
     }
     // GET input1 value on <ESP_IP>/set?store_history_data=<inputMessage>
     else if (request->hasParam(PARAM_STORE_HISTORY_DATA)) {

@@ -339,6 +339,18 @@
                        title="Please enter a valid password (letters, numbers, and underscores only)">
                 <input type="submit" value="Save">
             </form>
+
+            <form action="/set">
+                <label for="mqtt_temp_topic">MQTT Temperature topic:</label>
+                <input type="text" 
+                       id="mqtt_temp_topic" 
+                       name="mqtt_temp_topic" 
+                       value="%MQTT_TEMP_TOPIC_PLACEHOLDER%" 
+                       maxlength="100" 
+                       pattern="^[a-zA-Z0-9_/]+$"
+                       title="Please enter a valid path (e.g. home/livingroom/temperature)">
+                <input type="submit" value="Save">
+            </form>
         </div>
 
         <div class="uptime-info">

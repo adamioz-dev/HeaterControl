@@ -21,6 +21,7 @@ void Storage::begin() {
         storeMQTTPort(MQTT_PORT);
         storeMQTTUser(MQTT_USER);
         storeMQTTPass(MQTT_PASS);
+        storeMQTTTempTopic(MQTT_TOPIC_CONTROL_TEMP);
         storeMQTTEnabled(false);
         
         // Mark as configured
@@ -148,4 +149,13 @@ void Storage::storeMQTTPass(const char* pass) {
 
 String Storage::loadMQTTPass() {
     return readString(MQTT_PASS_ADDR);
+}
+
+void Storage::storeMQTTTempTopic(const char* topic) {
+    writeString(MQTT_TEMP_TOPIC_ADDR, topic, 100);
+    EEPROM.commit();
+}
+
+String Storage::loadMQTTTempTopic() {
+    return readString(MQTT_TEMP_TOPIC_ADDR);
 }

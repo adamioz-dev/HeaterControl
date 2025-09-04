@@ -15,6 +15,8 @@ public:
     static String loadMQTTUser();
     static void storeMQTTPass(const char* pass);
     static String loadMQTTPass();
+    static void storeMQTTTempTopic(const char* topic);
+    static String loadMQTTTempTopic();
     static bool isConfigured();
     static void resetToDefaults();
     static void storeMQTTEnabled(bool enabled);
@@ -30,6 +32,7 @@ private:
     static const int MQTT_PORT_ADDR = 100;
     static const int MQTT_USER_ADDR = 150;
     static const int MQTT_PASS_ADDR = 200;
+    static const int MQTT_TEMP_TOPIC_ADDR = 250;
 };
 
 extern Storage storage;
