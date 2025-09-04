@@ -23,6 +23,7 @@ void Storage::begin() {
         storeMQTTPass(MQTT_PASS);
         storeMQTTTempTopic(MQTT_TOPIC_CONTROL_TEMP);
         storeMQTTEnabled(false);
+        storeBlynkEnabled(true);
         
         // Mark as configured
         EEPROM.write(CONFIG_FLAG_ADDR, CONFIGURED_FLAG);
@@ -120,6 +121,15 @@ void Storage::storeMQTTEnabled(bool enabled) {
 
 bool Storage::loadMQTTEnabled() {
     return EEPROM.read(MQTT_ENABLED_ADDR) == 1;
+}
+
+void Storage::storeBlynkEnabled(bool enabled) {
+    EEPROM.write(BLYNK_ENABLE_ADDR, enabled ? 1 : 0);
+    EEPROM.commit();
+}
+
+bool Storage::loadBlynkEnabled() {
+    return EEPROM.read(BLYNK_ENABLE_ADDR) == 1;
 }
 
 void Storage::storeMQTTPort(uint16_t port) {

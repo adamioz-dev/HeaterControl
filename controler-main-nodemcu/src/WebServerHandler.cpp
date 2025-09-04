@@ -13,6 +13,8 @@
 #include <math.h>
 #include "MQTT.h"
 
+#include "BlynkHandler.h"
+
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
@@ -112,7 +114,8 @@ const char *PARAM_MQTT_BROKER_PORT =      "broker_port";
 const char *PARAM_MQTT_USER =             "mqtt_user";
 const char *PARAM_MQTT_PASS =             "mqtt_pass";
 const char *PARAM_MQTT_TEMP_TOPIC =       "mqtt_temp_topic";
-
+// Blynk data
+const char *PARAM_BLYNK_FEATURE_STATE =   "blynk_state";
 
 // login info for web page
 const char* http_username = HTTP_PAGE_USERNAME;
@@ -420,6 +423,12 @@ String setting_processor(const String &var) {
   else if (var == "MQTT_DISABLED_SELECTED") {
     return String(mqtt.isEnabled() ? "" : "selected");
   }
+  else if (var == "BLYNK_ENABLED_SELECTED") {
+    return String(getBynkStatus() ? "selected" : "");
+  }
+  else if (var == "BLYNK_DISABLED_SELECTED")  {
+    return String(getBynkStatus() ? "" : "selected");
+  }
   else if (var == "HEATING_MODE_SELECT_PLACEHOLDER") {
     String text = "";
     // change the order of the select options based on the current mode
@@ -714,6 +723,23 @@ void server_page_setup() {
         returnMessageHTML = "Only numbers are allowed! <br><a href=\"/\">Go back to control panel</a>";
       }
     }
+    // GET input1 value on <ESP_IP>/set?blynk_state=<inputMessage>
+    else if (request->hasParam(PARAM_BLYNK_FEATURE_STATE)) {
+      inputMessage = request->getParam(PARAM_BLYNK_FEATURE_STATE)->value();
+      inputParam = PARAM_BLYNK_FEATURE_STATE;
+      if (isValidNumber(String(inputMessage))) {
+        int value_flag = inputMessage.toInt();
+        if (value_flag == 1) {
+          setBlynkStatus(true);
+        } else {
+          setBlynkStatus(false);
+        }
+      }
+      else {
+        returnMessageHTML = "Only numbers are allowed! <br><a href=\"/\">Go back to control panel</a>";
+      }
+    }
+    
     // GET input1 value on <ESP_IP>/set?broker_ip=<inputMessage>
     else if (request->hasParam(PARAM_MQTT_BROKER_IP)) {
       inputMessage = request->getParam(PARAM_MQTT_BROKER_IP)->value();

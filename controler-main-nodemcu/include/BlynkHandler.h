@@ -7,5 +7,7 @@ void myTimerEvent();
 void initialize_blynk();
 void setup_blynk();
 void loop_blynk();
+bool getBynkStatus();
+void setBlynkStatus(bool enabled);  
 
 #endif //BYLNK_CENTRALA

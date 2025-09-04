@@ -1763,6 +1763,17 @@ const char settings_html[] PROGMEM = R"rawliteral(
                 <input type="submit" value="Save">
             </form>
         </div>
+        <div class="card">
+            <h2>Blynk Settings</h2>
+            <form action="/set">
+                <label for="blynk_state">Blynk state:</label>
+                <select id="blynk_state" name="blynk_state">
+                    <option value="1" %BLYNK_ENABLED_SELECTED%>Enabled</option>
+                    <option value="0" %BLYNK_DISABLED_SELECTED%>Disabled</option>
+                </select>
+                <input type="submit" value="Save">
+            </form>
+        </div>
 
         <div class="uptime-info">
             <p>Uno uptime: <span id="uno_uptime_id"></span></p>

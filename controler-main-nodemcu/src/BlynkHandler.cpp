@@ -14,11 +14,16 @@
 #include "BlynkHandler.h"
 #include <ESP8266httpUpdate.h>
 
+#include "Storage.h"
+
 // Your WiFi credentials for Blynk.
 const char* ssid;
 const char* pass;
 
 bool blynk_initialized = false;
+
+// blynk enabled flag
+bool blynk_enabled = true;
 
 // wifi client instance
 WiFiClient client;
@@ -461,9 +466,17 @@ void myTimerEvent()
 }
 
 void initialize_blynk(){
+  static unsigned long last_blynk_init_attempt = 0;
+
   if (WiFi.status() == WL_CONNECTED){
     ssid = WiFi.SSID().c_str();
     pass = WiFi.psk().c_str();
+
+    if ((millis() - last_blynk_init_attempt) < 30000){
+      // try only every 30 sec
+      return;
+    }
+    last_blynk_init_attempt = millis();
 
     if(client.connect(BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT) == true)
     {
@@ -480,15 +493,41 @@ void initialize_blynk(){
   }
 }
 
+bool getBynkStatus(){
+  // return blynk enabled status
+  return blynk_enabled;
+}
+
+void setBlynkStatus(bool enabled){
+  DEBUG_PRINT("Blynk: Status set to ");
+  DEBUG_PRINT_LN(enabled ? "enabled" : "disabled");
+  // set blynk enabled status
+  blynk_enabled = enabled;
+  // store in eeprom
+  storage.storeBlynkEnabled(blynk_enabled);
+}
 
 void setup_blynk(){
+  // read blynk enabled status from memory
+  blynk_enabled = storage.loadBlynkEnabled();
+  DEBUG_PRINT_LN("Blynk: Reading status from memory: " + String(blynk_enabled ? "enabled" : "disabled"));
+  // if enabled, initialize blynk
+  if (!getBynkStatus()) {
+    return;
+  }
+  // initialize blynk
   initialize_blynk();
 }
 
 void loop_blynk(){
-  if ((WiFi.status() == WL_CONNECTED)){/// && ){
+  // check if blynk is enabled
+  if (!getBynkStatus()) {
+    return;
+  }
+  // Check if WiFi is connected
+  if ((WiFi.status() == WL_CONNECTED)){
     if (blynk_initialized){
-      if(client.connect(BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT) == true)
+      if ((Blynk.connected()) && (client.connect(BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT) == true))
       {
         client.stop();
 
@@ -498,6 +537,9 @@ void loop_blynk(){
       else
       {
         client.stop();
+        blynk_initialized = false;
+        DEBUG_PRINT_LN("Blynk: Disconnected!");
+        return;
       }
     }
     else{

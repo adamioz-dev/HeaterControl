@@ -866,15 +866,15 @@ void setup() {
   // check rtc flag for flasg request
   checkRTCData();
 
-  // connect to blynk after connected
-  setup_blynk(); 
-
   /* setup communication */
   setup_sw_uart();
 
   /* setup mqtt */
   setup_mqtt();
 
+  // connect to blynk after connected
+  setup_blynk(); 
+  
   /* turn off startup led */
   digitalWrite(LEDPIN, HIGH); // turn off led  
 }
