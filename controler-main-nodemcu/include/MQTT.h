@@ -13,6 +13,7 @@
 #define MQTT_TOPIC_CONTROL_SUBS     "home/heater/control/#"
 #define MQTT_TOPIC_CONTROL_STATE    "home/heater/control/state"
 #define MQTT_TOPIC_CONTROL_TEMP     "home/heater/control/temperature" // default topic for room temperature
+#define MQTT_TOPIC_CONTROL_SETPOINT "home/heater/control/setpoint"   // topic for setting target temperature
 // States
 #define MQTT_TOPIC_PUBLISH          "home/heater/status"
 #define MQTT_TOPIC_PUBLISH_FEEDBACK "home/heater/status/feedback"
@@ -20,6 +21,9 @@
 #define MQTT_TOPIC_PUBLISH_PUFFER   "home/heater/status/puffer"
 #define MQTT_TOPIC_PUBLISH_BOILER   "home/heater/status/boiler"
 #define MQTT_TOPIC_PUBLISH_REMAIN   "home/heater/status/remaining"
+#define MQTT_TOPIC_PUBLISH_ROOM     "home/heater/status/room"    // Topic for reporting current room temperature
+#define MQTT_TOPIC_PUBLISH_SETPOINT "home/heater/status/setpoint" // Topic for reporting target temperature
+#define MQTT_TOPIC_PUBLISH_MODE     "home/heater/status/mode"     // Topic for reporting current operation mode
 
 //***********************************************************************
 // DECLARATIONS

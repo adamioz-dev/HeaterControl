@@ -234,6 +234,40 @@ void publishMqtt() {
     uint16_t remaining_sec = (uint16_t)comTransmitData.getHeatingTimer_TimeRemaining_sec();
     String(remaining_sec).toCharArray(temp, sizeof(temp));
     mqtt.publish(MQTT_TOPIC_PUBLISH_REMAIN, temp);
+    
+    // Publish current room temperature if valid
+    float roomTemp = comTransmitData.getHeatingTermostat_AmbientTemp();
+    if (comTransmitData.getHeatingTermostat_AmbientTemp_Valid() == false || roomTemp == 0) {
+        // no valid temp, exit
+        DEBUG_PRINT_LN("MQTT: Room temp not valid, skipping publish");
+    }
+    else {
+        dtostrf(roomTemp, 4, 1, temp);
+        mqtt.publish(MQTT_TOPIC_PUBLISH_ROOM, temp);
+    }
+
+    // Publish target temperature setpoint
+    float setpointTemp = comTransmitData.getHeatingTermostat_target_ambient();
+    dtostrf(setpointTemp, 4, 1, temp);
+    mqtt.publish(MQTT_TOPIC_PUBLISH_SETPOINT, temp);
+
+    // Publish heating mode
+    uint8_t heatingMode = comTransmitData.getHeating_mode();
+    String modeStr;
+    switch (heatingMode) {  
+        case TIMER_MODE:
+            modeStr = "TIMER";
+            break;
+        case TEMPERATURE_MODE:
+            modeStr = "TEMPERATURE";
+            break;
+        case THERMOSTAT_MODE:
+            modeStr = "THERMOSTAT";
+            break;
+        default:
+            modeStr = "UNKNOWN";
+    }
+    mqtt.publish(MQTT_TOPIC_PUBLISH_MODE, modeStr.c_str());
 
     DEBUG_PRINT_LN("MQTT: Publish complete");
 }
@@ -264,6 +298,17 @@ void IRAM_ATTR mqttCallback(char* topic, byte* payload, unsigned int length) {
             comTransmitData.setHeating_TriggerRequest(HEATER_ON, true);
         } else if (message == "OFF") {
             comTransmitData.setHeating_TriggerRequest(HEATER_OFF, true);
+        }
+    }
+    // handle target temperature setpoint
+    else if (String(topic) == MQTT_TOPIC_CONTROL_SETPOINT) {
+        if (isValidNumber(message)) {
+            float targetTemp = message.toFloat();
+            if (targetTemp >= 5.0f && targetTemp <= 30.0f) {  // reasonable temperature range
+                comTransmitData.setHeatingTermostat_target_ambient((targetTemp * FLOAT_SCALING), true);
+            } else {
+                DEBUG_PRINT_LN("MQTT: Target temperature out of valid range");
+            }
         }
     }
     // handle measured temperatures received
