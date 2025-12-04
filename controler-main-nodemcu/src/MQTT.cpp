@@ -351,6 +351,20 @@ void IRAM_ATTR mqttCallback(char* topic, byte* payload, unsigned int length) {
                 DEBUG_PRINT_LN("MQTT: JSON does not contain any expected temperature keys, ignoring");
                 return;
             }
+
+            // extract battery level value, try different keys
+            if (doc.containsKey("volt")) {
+                float bat_v = doc["volt"];
+                receiveRoomTempBattery(bat_v);
+            }
+            else if (doc.containsKey("voltage")) {
+                // assume temperature in Celsius if no unit specified
+                float bat_v = doc["voltage"];
+                receiveRoomTempBattery(bat_v);
+            } else {
+                DEBUG_PRINT_LN("MQTT: JSON does not contain any expected voltage keys, ignoring");
+                return;
+            }
         // check if message is just a valid number
         } else if (isValidNumber(message)) {
             float targetTemp = message.toFloat();
