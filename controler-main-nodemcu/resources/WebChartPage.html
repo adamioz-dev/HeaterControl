@@ -329,7 +329,66 @@ function setupFormHandlers() {
 // Initialize form handlers when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     setupFormHandlers();
+    fetchChartInfo();
 });
+
+// Function to fetch chart info
+function fetchChartInfo() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var current_time = new Date();
+        const timezone_offset = current_time.getTimezoneOffset() * 60 * 1000;
+        var response_str = this.responseText;
+        var x = current_time.getTime() - timezone_offset,
+            y_value_0 =  parseFloat(response_str.split("|")[0]);
+            y_value_1 =  parseFloat(response_str.split("|")[1]);
+            y_value_2 =  parseFloat(response_str.split("|")[2]);
+            y_value_3 =  parseFloat(response_str.split("|")[3]);
+            y_value_4 =  parseFloat(response_str.split("|")[4]);
+            y_value_5 =  parseFloat(response_str.split("|")[5]);
+        
+        //Value 0
+        if(chart_Fire_Info.series[0].data.length > 600) {
+          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, true, true);
+        } else {
+          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, false, true);
+        }
+        //Value 1
+        if(chart_Fire_Info.series[1].data.length > 600) {
+          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, true, true);
+        } else {
+          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, false, true);
+        }
+        //Value 2
+        if(chart_Fire_Info.series[2].data.length > 600) {
+          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, true, true);
+        } else {
+          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, false, true);
+        }
+        //Value 3
+        if(chart_Fire_Info.series[3].data.length > 600) {
+          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, true, true);
+        } else {
+          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, false, true);
+        }
+        //Value 4
+        if(chart_Fire_Info.series[4].data.length > 600) {
+          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, true, true);
+        } else {
+          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, false, true);
+        }
+        //Value 5
+        if(chart_Fire_Info.series[5].data.length > 600) {
+          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, true, true);
+        } else {
+          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, false, true);
+        }
+      }
+    };
+    xhttp.open("GET", "/chart_info", true);
+    xhttp.send();
+}
 
   // update functions
   setInterval(function ( ) {
@@ -412,64 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }],
   
   });
-  setInterval(function ( ) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        var current_time = new Date();
-        const timezone_offset = current_time.getTimezoneOffset() * 60 * 1000;
-        //console.log(timezone_offset);
-        var response_str = this.responseText;
-        var x = current_time.getTime() - timezone_offset,
-            y_value_0 =  parseFloat(response_str.split("|")[0]);
-            y_value_1 =  parseFloat(response_str.split("|")[1]);
-            y_value_2 =  parseFloat(response_str.split("|")[2]);
-            y_value_3 =  parseFloat(response_str.split("|")[3]);
-            y_value_4 =  parseFloat(response_str.split("|")[4]);
-            y_value_5 =  parseFloat(response_str.split("|")[5]);
-        //console.log(this.responseText);
-        //values to be filled in
-        //Value 0
-        if(chart_Fire_Info.series[0].data.length > 600) {
-          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, true, true);
-        } else {
-          chart_Fire_Info.series[0].addPoint([x, y_value_0], true, false, true);
-        }
-        //Value 1
-        if(chart_Fire_Info.series[1].data.length > 600) {
-          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, true, true);
-        } else {
-          chart_Fire_Info.series[1].addPoint([x, y_value_1], true, false, true);
-        }
-        //Value 2
-        if(chart_Fire_Info.series[2].data.length > 600) {
-          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, true, true);
-        } else {
-          chart_Fire_Info.series[2].addPoint([x, y_value_2], true, false, true);
-        }
-        //Value 3
-        if(chart_Fire_Info.series[3].data.length > 600) {
-          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, true, true);
-        } else {
-          chart_Fire_Info.series[3].addPoint([x, y_value_3], true, false, true);
-        }
-        //Value 4
-        if(chart_Fire_Info.series[4].data.length > 600) {
-          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, true, true);
-        } else {
-          chart_Fire_Info.series[4].addPoint([x, y_value_4], true, false, true);
-        }
-        //Value 5
-        if(chart_Fire_Info.series[5].data.length > 600) {
-          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, true, true);
-        } else {
-          chart_Fire_Info.series[5].addPoint([x, y_value_5], true, false, true);
-        }
-      }
-    };
-    xhttp.open("GET", "/chart_info", true);
-    xhttp.send();
-  }, 60000 ) ; // every minute
+  // Update chart data every minute
+  setInterval(fetchChartInfo, 60000); // every minute
   </script>
 </body>
 </html>

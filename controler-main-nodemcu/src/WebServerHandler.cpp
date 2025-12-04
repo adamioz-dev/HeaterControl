@@ -35,6 +35,7 @@
 
 // history data
 #define MAX_HISTORY_DATA_LEN     120 //MAX should be 180 // max history length * data collection interval (1 min) => the total time
+#define HISTORY_DATA_VALUE_SCALING 10
 
 // datatypes
 enum chart_history_datapoints {
@@ -52,11 +53,10 @@ union connectionData_t {
 };
 
 //history data
-typedef struct {
-  uint16_t      data[MAX_DATA_POINTS+1][MAX_HISTORY_DATA_LEN+1];
-  unsigned long recordTimes[MAX_HISTORY_DATA_LEN+1];
-}historyData_t;
-
+struct HistoryData_t {
+  uint16_t data[MAX_DATA_POINTS + 1][MAX_HISTORY_DATA_LEN + 1];
+  uint32_t recordTimes[MAX_DATA_POINTS + 1][MAX_HISTORY_DATA_LEN + 1];
+};
 // -------- function declarations --------
 
 // -------- Function declarations  --------
@@ -130,10 +130,10 @@ bool AP_mode_active = false;
 unsigned long epochTime = 0;
 
 // structure to hod the history data
-historyData_t g_historyData;
-uint16_t g_historyDataIndex = 0;
+HistoryData_t g_historyData;
+uint16_t g_historyDataIndex[MAX_DATA_POINTS + 1] = {0};
 // marker to record if the history data is filled and should be read in ring mode
-bool filled_history_data = false; 
+bool filled_history_data[MAX_DATA_POINTS + 1] = {false}; 
 bool store_history_data_flag = false; 
 
 // Create AsyncWebServer object on port 80
@@ -467,9 +467,10 @@ String createHistoryDataForPlaceHolders(uint8_t selected_data){
   uint16_t local_start_entry_index = 0;
   int16_t local_read_entry_index = 0;
   uint16_t local_buffer_size = 0;
-  uint16_t local_historyDataIndex = g_historyDataIndex;
+  // Get the index for the selected datapoint
+  uint16_t local_historyDataIndex = g_historyDataIndex[selected_data];
 
-  if(filled_history_data == true){
+  if(filled_history_data[selected_data] == true){
     // buffer full, must use in ring mode
     if (local_historyDataIndex == 0){
       // back to the last element written
@@ -499,8 +500,8 @@ String createHistoryDataForPlaceHolders(uint8_t selected_data){
       local_read_entry_index = local_read_entry_index - local_buffer_size;
     }
     
-    // get data points
-    history_content += ("["+String(g_historyData.recordTimes[local_read_entry_index]) +"000,"+  String(((float)g_historyData.data[selected_data][local_read_entry_index] / FLOAT_SCALING)) + "]"); // in ms for highcharts
+    // get data points - use selected_data index for both data and recordTimes
+    history_content += ("["+String(g_historyData.recordTimes[selected_data][local_read_entry_index]) +"000,"+  String(((float)g_historyData.data[selected_data][local_read_entry_index] / HISTORY_DATA_VALUE_SCALING)) + "]"); // in ms for highcharts
     
     // select next entry
     local_read_index++;
@@ -510,7 +511,7 @@ String createHistoryDataForPlaceHolders(uint8_t selected_data){
     }
   }
   //return the string of data to be replaced
-  return(String(history_content)); // was history_content
+  return(String(history_content));
 }
 
 //HTML settings Processor, replaces PLACEHOLDERs with the correct and filled in information
@@ -803,8 +804,7 @@ void server_page_setup() {
           default:
             store_history_data_flag = false;
             //clear stored
-            g_historyDataIndex = 0;
-            filled_history_data = false;    
+            initHistoryArray();
             returnMessageHTML = "Store history data disabled!<br><a href=\"/chart.html\">Go back</a>";
             break;
         }
@@ -885,12 +885,18 @@ void server_page_setup() {
     }
     else // history is on
     {
-      if (filled_history_data == true) {
-        content += ("(" + String(g_historyDataIndex) + ") " + String(MAX_HISTORY_DATA_LEN));
+      for (uint8_t data_point = 0; data_point < MAX_DATA_POINTS; data_point++){
+        if (filled_history_data[data_point] == true) {
+          content += ("(" + String(g_historyDataIndex[data_point]) + ")");
+        }
+        else{
+          content += String(g_historyDataIndex[data_point]);
+        }
+        if (data_point < (MAX_DATA_POINTS - 1)){
+          content += ", ";
+        }
       }
-      else{
-        content += String(g_historyDataIndex);
-      }
+      content += "[" + String(MAX_HISTORY_DATA_LEN) + "]";
     }
     // return response
     request->send(200, "text/plain", String(content));
@@ -1078,64 +1084,54 @@ void server_page_setup() {
 
 void initHistoryArray(){
   g_historyData.data[MAX_DATA_POINTS][MAX_HISTORY_DATA_LEN] = {0};
-  g_historyData.recordTimes[MAX_HISTORY_DATA_LEN] = {0};
+  g_historyData.recordTimes[MAX_DATA_POINTS][MAX_HISTORY_DATA_LEN] = {0};
+  g_historyDataIndex[MAX_DATA_POINTS] = {0};
+  filled_history_data[MAX_DATA_POINTS] = {false};    
 }
 
 void appendToHistoryArray(){
-  uint16_t local_historyDataIndex_prev = 0;
-  uint16_t local_historyDataIndex = g_historyDataIndex;
   // get new data
-  uint16_t local_new_datatpoint_0 =  (uint16_t)((float)comTransmitData.get_Feedback() * 10 * 10);
-  uint16_t local_new_datatpoint_1 =  (uint16_t)(((float)comTransmitData.getPuffer_Temp() * 10));
-  uint16_t local_new_datatpoint_2 =  (uint16_t)((((float)comTransmitData.getHeatingTimer_TimeRemaining_sec() / 60) * 10));
-  uint16_t local_new_datatpoint_3 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_AmbientTemp() * 10));
-  uint16_t local_new_datatpoint_4 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_target_ambient() * 10));
-  uint16_t local_new_datatpoint_5 =  (uint16_t)(((float)comTransmitData.getBoiler_Temp() * 10));
+  uint16_t local_new_datatpoint_0 =  (uint16_t)((float)comTransmitData.get_Feedback() * HISTORY_DATA_VALUE_SCALING * 10);
+  uint16_t local_new_datatpoint_1 =  (uint16_t)(((float)comTransmitData.getPuffer_Temp() * HISTORY_DATA_VALUE_SCALING));
+  uint16_t local_new_datatpoint_2 =  (uint16_t)((((float)comTransmitData.getHeatingTimer_TimeRemaining_sec() / 60) * HISTORY_DATA_VALUE_SCALING));
+  uint16_t local_new_datatpoint_3 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_AmbientTemp() * HISTORY_DATA_VALUE_SCALING));
+  uint16_t local_new_datatpoint_4 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_target_ambient() * HISTORY_DATA_VALUE_SCALING));
+  uint16_t local_new_datatpoint_5 =  (uint16_t)(((float)comTransmitData.getBoiler_Temp() * HISTORY_DATA_VALUE_SCALING));
 
-  // limit to max
-  if (local_historyDataIndex >= MAX_HISTORY_DATA_LEN)
-  {
-    // back to index 0
-    local_historyDataIndex = 0;
-  }
-  
-  // pervious index
-  if (local_historyDataIndex == 0){
-    // for zero, take the last in the ring buffer
-    local_historyDataIndex_prev = MAX_HISTORY_DATA_LEN - 1;
-  }else
-  {
-    // previous measurement
-    local_historyDataIndex_prev = local_historyDataIndex - 1;
-  }
+  // Array of new datapoints
+  uint16_t newDatapoints[MAX_DATA_POINTS] = {local_new_datatpoint_0, local_new_datatpoint_1, local_new_datatpoint_2, 
+                               local_new_datatpoint_3, local_new_datatpoint_4, local_new_datatpoint_5};
 
-  // add data points (x10 for increased resolution) if any changed
-  if ((g_historyData.data[DATAPOINT_0][local_historyDataIndex_prev] != local_new_datatpoint_0) ||
-      (g_historyData.data[DATAPOINT_1][local_historyDataIndex_prev] != local_new_datatpoint_1) ||
-      (g_historyData.data[DATAPOINT_2][local_historyDataIndex_prev] != local_new_datatpoint_2) ||
-      (g_historyData.data[DATAPOINT_3][local_historyDataIndex_prev] != local_new_datatpoint_3) ||
-      (g_historyData.data[DATAPOINT_4][local_historyDataIndex_prev] != local_new_datatpoint_4) ||
-      (g_historyData.data[DATAPOINT_5][local_historyDataIndex_prev] != local_new_datatpoint_5))
-  {
-    // data is different, store it
-    g_historyData.data[DATAPOINT_0][local_historyDataIndex] = local_new_datatpoint_0;
-    g_historyData.data[DATAPOINT_1][local_historyDataIndex] = local_new_datatpoint_1;
-    g_historyData.data[DATAPOINT_2][local_historyDataIndex] = local_new_datatpoint_2;
-    g_historyData.data[DATAPOINT_3][local_historyDataIndex] = local_new_datatpoint_3;
-    g_historyData.data[DATAPOINT_4][local_historyDataIndex] = local_new_datatpoint_4;
-    g_historyData.data[DATAPOINT_5][local_historyDataIndex] = local_new_datatpoint_5;
-    // record the time of storage
-    g_historyData.recordTimes[local_historyDataIndex] = epochTime;
-    // move the index
-    local_historyDataIndex++;
-    //if reached end start from the begining
-    if (local_historyDataIndex >= MAX_HISTORY_DATA_LEN)
-    {
-      // mark filled up
-      filled_history_data = true;
+  // Process each datapoint independently
+  for (uint8_t datapoint = 0; datapoint < MAX_DATA_POINTS; datapoint++) {
+    uint16_t currentIndex = g_historyDataIndex[datapoint];
+    
+    // limit to max
+    if (currentIndex >= MAX_HISTORY_DATA_LEN) {
+      currentIndex = 0;
     }
-    // write new index
-    g_historyDataIndex = local_historyDataIndex;
+    
+    // get previous index
+    uint16_t previousIndex = (currentIndex == 0) ? (MAX_HISTORY_DATA_LEN - 1) : (currentIndex - 1);
+    
+    // check if this specific datapoint has changed
+    if (g_historyData.data[datapoint][previousIndex] != newDatapoints[datapoint]) {
+      // data is different, store it
+      g_historyData.data[datapoint][currentIndex] = newDatapoints[datapoint];
+      g_historyData.recordTimes[datapoint][currentIndex] = epochTime;
+      
+      // move the index for this datapoint
+      currentIndex++;
+      
+      // if reached end start from the beginning
+      if (currentIndex >= MAX_HISTORY_DATA_LEN) {
+        filled_history_data[datapoint] = true;
+        currentIndex = 0;
+      }
+      
+      // write new index for this datapoint
+      g_historyDataIndex[datapoint] = currentIndex;
+    }
   }
 }
 
