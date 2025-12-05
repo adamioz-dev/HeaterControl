@@ -409,6 +409,9 @@ function fetchChartInfo() {
           backgroundColor: '#f1f1f1',
           type: 'line'
       },
+      navigator: {
+            type: 'line'
+      },
        rangeSelector: {
         selected: 1
       },
@@ -427,7 +430,7 @@ function fetchChartInfo() {
               label: {
                   text: ''
               }
-			      }
+                  }
           ]
       },
       xAxis: { 
@@ -438,9 +441,10 @@ function fetchChartInfo() {
       },
       plotOptions: {
           series: {
+              step: 'left',
               label: {
                   connectorAllowed: true
-              },
+              }
           }
       },
   
@@ -451,6 +455,7 @@ function fetchChartInfo() {
       },{
           name: 'Puffer (&deg;C)',  //y_value_1
           color: 'blue',
+          step: false,
           data: [%PUFFER_DATA_PLACEHODLER%]
       },{
           name: 'Time Remaining (min)',  //y_value_3
@@ -459,14 +464,17 @@ function fetchChartInfo() {
       },{
           name: 'Room temperature (&deg;C)',  //y_value_5
           color: 'black',
+          step: false,
           data: [%ROOM_DATA_PLACEHODLER%]
       },{
           name: 'Set room temp (&deg;C)',  //y_value_6
           color: 'grey',
+          step: false,
           data: [%ROOM_TARGET_DATA_PLACEHODLER%]
       },{
           name: 'Heater (&deg;C)',  //y_value_7
           color: 'red',
+          step: false,
           data: [%HEATER_DATA_PLACEHODLER%]
       }],
   

@@ -464,7 +464,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           FEEDBACK: 3000
       },
       LIMITS: {
-          TEMPERATURE: { MIN: 10, MAX: 35, STEP: 0.1 },
+          TEMPERATURE: { MIN: 10, MAX: 35, STEP: 0.5 },
           TIME_ON: { MIN: 20, MAX: 120, STEP: 10 },
           TIME_OFF: { MIN: 0, MAX: 360, STEP: 10 }
       }
@@ -1342,6 +1342,9 @@ function fetchChartInfo() {
           backgroundColor: '#f1f1f1',
           type: 'line'
       },
+      navigator: {
+            type: 'line'
+      },
        rangeSelector: {
         selected: 1
       },
@@ -1360,7 +1363,7 @@ function fetchChartInfo() {
               label: {
                   text: ''
               }
-			      }
+                  }
           ]
       },
       xAxis: { 
@@ -1371,9 +1374,10 @@ function fetchChartInfo() {
       },
       plotOptions: {
           series: {
+              step: 'left',
               label: {
                   connectorAllowed: true
-              },
+              }
           }
       },
   
@@ -1384,6 +1388,7 @@ function fetchChartInfo() {
       },{
           name: 'Puffer (&deg;C)',  //y_value_1
           color: 'blue',
+          step: false,
           data: [%PUFFER_DATA_PLACEHODLER%]
       },{
           name: 'Time Remaining (min)',  //y_value_3
@@ -1392,14 +1397,17 @@ function fetchChartInfo() {
       },{
           name: 'Room temperature (&deg;C)',  //y_value_5
           color: 'black',
+          step: false,
           data: [%ROOM_DATA_PLACEHODLER%]
       },{
           name: 'Set room temp (&deg;C)',  //y_value_6
           color: 'grey',
+          step: false,
           data: [%ROOM_TARGET_DATA_PLACEHODLER%]
       },{
           name: 'Heater (&deg;C)',  //y_value_7
           color: 'red',
+          step: false,
           data: [%HEATER_DATA_PLACEHODLER%]
       }],
   
