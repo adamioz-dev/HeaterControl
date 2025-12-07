@@ -9,7 +9,7 @@
         #define PROJECT_UNO VERSION_UNO
     #endif
     #ifndef PROJECT_ESP
-        #define PROJECT_ESP 31
+        #define PROJECT_ESP 32
     #endif
 
     #ifndef PROJECT_STR_VERSION
@@ -20,6 +20,6 @@
     #endif //PROJECT_STR_VERSION
 
     #ifndef PROJECT_BUILD_TIMESTAMP
-        #define PROJECT_BUILD_TIMESTAMP "2025-09-17 16:12:48.325469"
+        #define PROJECT_BUILD_TIMESTAMP "2025-12-07 11:19:32.030521"
     #endif
     
