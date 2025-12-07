@@ -537,7 +537,7 @@ String charts_processor(const String &var)
   {
     return createHistoryDataForPlaceHolders(DATAPOINT_3);
   }
-  else if (var == "ROOM_TARGET_DATA_PLACEHODLER") 
+  else if (var == "ROOM_BAT_DATA_PLACEHODLER") 
   {
     return createHistoryDataForPlaceHolders(DATAPOINT_4);
   }
@@ -1095,7 +1095,7 @@ void appendToHistoryArray(){
   uint16_t local_new_datatpoint_1 =  (uint16_t)(((float)comTransmitData.getPuffer_Temp() * HISTORY_DATA_VALUE_SCALING));
   uint16_t local_new_datatpoint_2 =  (uint16_t)((((float)comTransmitData.getHeatingTimer_TimeRemaining_sec() / 60) * HISTORY_DATA_VALUE_SCALING));
   uint16_t local_new_datatpoint_3 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_AmbientTemp() * HISTORY_DATA_VALUE_SCALING));
-  uint16_t local_new_datatpoint_4 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_target_ambient() * HISTORY_DATA_VALUE_SCALING));
+  uint16_t local_new_datatpoint_4 =  (uint16_t)(((float)comTransmitData.getHeatingTermostat_AmbientTempBattery() * HISTORY_DATA_VALUE_SCALING));
   uint16_t local_new_datatpoint_5 =  (uint16_t)(((float)comTransmitData.getBoiler_Temp() * HISTORY_DATA_VALUE_SCALING));
 
   // Array of new datapoints
@@ -1144,7 +1144,7 @@ String processFeedbackChartString(){
                   String(comTransmitData.getPuffer_Temp()) +"|"+ \
                   String((comTransmitData.getHeatingTimer_TimeRemaining_sec() / 60)) +"|"+ \
                   String(comTransmitData.getHeatingTermostat_AmbientTemp()) +"|"+ \
-                  String(comTransmitData.getHeatingTermostat_target_ambient()) +"|"+ \
+                  String(comTransmitData.getHeatingTermostat_AmbientTempBattery()) +"|"+ \
                   String(comTransmitData.getBoiler_Temp());
   return returnText;
 }

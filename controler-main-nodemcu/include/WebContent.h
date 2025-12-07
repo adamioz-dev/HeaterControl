@@ -1400,10 +1400,10 @@ function fetchChartInfo() {
           step: false,
           data: [%ROOM_DATA_PLACEHODLER%]
       },{
-          name: 'Set room temp (&deg;C)',  //y_value_6
+          name: 'Room temp sensor battery (volt)',  //y_value_6
           color: 'grey',
           step: false,
-          data: [%ROOM_TARGET_DATA_PLACEHODLER%]
+          data: [%ROOM_BAT_DATA_PLACEHODLER%]
       },{
           name: 'Heater (&deg;C)',  //y_value_7
           color: 'red',
