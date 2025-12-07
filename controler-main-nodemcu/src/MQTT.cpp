@@ -251,6 +251,16 @@ void publishMqtt() {
     dtostrf(setpointTemp, 4, 1, temp);
     mqtt.publish(MQTT_TOPIC_PUBLISH_SETPOINT, temp);
 
+    // Publish timer on-time
+    int timerOntime = comTransmitData.getHeatingTimer_ontime();
+    String(timerOntime).toCharArray(temp, sizeof(temp));
+    mqtt.publish(MQTT_TOPIC_PUBLISH_TIMER_ON, temp);
+
+    // Publish timer off-time
+    int timerOfftime = comTransmitData.getHeatingTimer_offtime();
+    String(timerOfftime).toCharArray(temp, sizeof(temp));
+    mqtt.publish(MQTT_TOPIC_PUBLISH_TIMER_OFF, temp);
+
     // Publish heating mode
     uint8_t heatingMode = comTransmitData.getHeating_mode();
     String modeStr;
@@ -308,6 +318,28 @@ void IRAM_ATTR mqttCallback(char* topic, byte* payload, unsigned int length) {
                 comTransmitData.setHeatingTermostat_target_ambient((targetTemp * FLOAT_SCALING), true);
             } else {
                 DEBUG_PRINT_LN("MQTT: Target temperature out of valid range");
+            }
+        }
+    }
+    // handle timer on-time
+    else if (String(topic) == MQTT_TOPIC_CONTROL_TIMER_ON) {
+        if (isValidNumber(message)) {
+            int ontime = message.toInt();
+            if (ontime >= 0 && ontime <= 360) {  // minutes
+                comTransmitData.setHeatingTimer_ontime(ontime, true);
+            } else {
+                DEBUG_PRINT_LN("MQTT: Timer on-time out of valid range (0-1440 minutes)");
+            }
+        }
+    }
+    // handle timer off-time
+    else if (String(topic) == MQTT_TOPIC_CONTROL_TIMER_OFF) {
+        if (isValidNumber(message)) {
+            int offtime = message.toInt();
+            if (offtime >= 0 && offtime <= 360) {  // minutes
+                comTransmitData.setHeatingTimer_offtime(offtime, true);
+            } else {
+                DEBUG_PRINT_LN("MQTT: Timer off-time out of valid range (0-1440 minutes)");
             }
         }
     }
